@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.deange.hexclock"
-        minSdkVersion 8
+        minSdkVersion 11
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
@@ -27,5 +27,4 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:19.+'
 }
