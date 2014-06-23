@@ -8,9 +8,13 @@ import java.util.TimerTask;
 
 public class HexAnimator implements Closeable {
 
+    private static final int DELAY = 100;
+
     private ColourView mColourView;
     private NumberGroup mNumberGroup;
+
     private Timer mTimer;
+    private final Handler mHandler = new Handler();
 
     public HexAnimator(final ColourView colourView, final NumberGroup numberGroup) {
         mColourView = colourView;
@@ -20,8 +24,16 @@ public class HexAnimator implements Closeable {
 
     private void update() {
         final Instant now = Instant.get();
-        mColourView.setColour(0xFF000000 | Integer.parseInt(now.toString(), 16));
+
         mNumberGroup.update(now.getHours(), now.getMinutes(), now.getSeconds());
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Delay is needed since the number group performs an animation
+                // 100ms is roughly in the middle of the animation
+                mColourView.setColour(0xFF000000 | Integer.parseInt(now.toString(), 16));
+            }
+        }, DELAY);
     }
 
     public void start() {
@@ -40,7 +52,6 @@ public class HexAnimator implements Closeable {
 
     private final class UpdateTask extends TimerTask {
 
-        private final Handler mHandler = new Handler();
         private final Runnable mRunnable = new Runnable() {
             @Override
             public void run() {

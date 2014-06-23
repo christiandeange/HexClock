@@ -22,7 +22,7 @@ public class ColourView extends View {
     }
 
     private void init() {
-        setColour(0xFF000000);
+        setColour(0xFF000000 | Integer.parseInt(Instant.get().toString(), 16));
     }
 
     public int getColour() {
