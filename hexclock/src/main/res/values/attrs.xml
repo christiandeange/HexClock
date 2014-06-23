@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="fontTextViewStyle" format="reference" />
+
+    <declare-styleable name="FontTextView">
+        <attr name="fontName" format="string"/>
+    </declare-styleable>
+
+</resources>
