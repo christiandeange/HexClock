@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+    <com.deange.hexclock.FontTextView
+            style="?android:attr/textAppearanceLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hash_character"
+            android:textSize="30sp"
+            android:textColor="@android:color/white"
+            app:fontName="Roboto-Thin.ttf" />
+
+    <com.deange.numberview.NumberView
+            android:id="@+id/hour_tens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <com.deange.numberview.NumberView
+            android:id="@+id/hour_ones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <com.deange.numberview.NumberView
+            android:id="@+id/minute_tens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <com.deange.numberview.NumberView
+            android:id="@+id/minute_ones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <com.deange.numberview.NumberView
+            android:id="@+id/second_tens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    <com.deange.numberview.NumberView
+            android:id="@+id/second_ones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+</LinearLayout>
