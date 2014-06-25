@@ -2,8 +2,6 @@
 <resources>
 
     <string name="app_name">HexClock</string>
-    <string name="pref_dream_text_key">pref_dream_text</string>
-    <string name="pref_dream_text_default">zzzZZZzzz</string>
     <string name="hash_character">#</string>
 
 </resources>

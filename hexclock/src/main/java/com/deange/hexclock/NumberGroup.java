@@ -37,6 +37,7 @@ public class NumberGroup extends FrameLayout {
         numbers[NumberHelper.SECOND_TENS] = (NumberView) findViewById(R.id.second_tens);
         numbers[NumberHelper.SECOND_ONES] = (NumberView) findViewById(R.id.second_ones);
 
+        final float textSize = getResources().getDimensionPixelSize(R.dimen.numberview_text_size);
         mHelper = new NumberHelper(numbers);
         mHelper.apply(new NumberHelper.NumberViewMutator() {
             @Override
@@ -44,9 +45,13 @@ public class NumberGroup extends FrameLayout {
                 final Paint paint = view.getPaint();
                 paint.setColor(Color.WHITE);
                 view.setPaint(paint);
-                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+                view.setTextSize(textSize);
             }
         });
+    }
+
+    public void apply(final NumberHelper.NumberViewMutator mutator) {
+        mHelper.apply(mutator);
     }
 
     public void update(final int hours, final int minutes, final int seconds) {

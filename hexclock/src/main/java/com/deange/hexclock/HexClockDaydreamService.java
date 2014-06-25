@@ -1,20 +1,15 @@
 package com.deange.hexclock;
 
-import java.util.Random;
-
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.TimeInterpolator;
 import android.annotation.TargetApi;
-import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Build;
-import android.preference.PreferenceManager;
+import android.os.Handler;
 import android.service.dreams.DreamService;
-import android.view.ViewPropertyAnimator;
-import android.view.animation.LinearInterpolator;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.RelativeLayout;
+
+import java.util.Random;
 
 
 /**
@@ -27,99 +22,101 @@ import android.widget.TextView;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 public class HexClockDaydreamService extends DreamService {
 
-    private static final TimeInterpolator sInterpolator = new LinearInterpolator();
+    private static final int ANIMATION_DURATION = 3500;
+    private static final int SHOW_DURATION = 10000 + ANIMATION_DURATION;
+    private static final int INTERMISSION_DURATION = ANIMATION_DURATION + 100;
 
-    private final AnimatorListener mAnimListener = new AnimatorListenerAdapter() {
-
+    private final Rect mRect = new Rect();
+    private final Handler mHandler = new Handler();
+    private final Runnable mMoveRunnable = new Runnable() {
         @Override
-        public void onAnimationEnd(Animator animation) {
-            // Start animation again
-            startTextViewScrollAnimation();
+        public void run() {
+            move();
         }
-
+    };
+    private final Runnable mStopRunnable = new Runnable() {
+        @Override
+        public void run() {
+            prepNextAnimation();
+        }
     };
 
-    private final Random mRandom = new Random();
-    private final Point mPointSize = new Point();
-
-    private TextView mDreamTextView;
-    private ViewPropertyAnimator mAnimator;
+    private NumberGroup mNumberGroup;
+    private HexAnimator mAnimator;
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        // Exit dream upon user touch?
         setInteractive(false);
-
-        // Hide system UI?
         setFullscreen(true);
-
-        // Keep screen at full brightness?
-        setScreenBright(false);
+        setScreenBright(true);
 
         // Set the content view, just like you would with an Activity.
-        setContentView(R.layout.hex_clock_daydream);
+        setContentView(R.layout.hex_clock_layout);
+        final ColourView colourView = (ColourView) findViewById(R.id.hex_view);
+        mNumberGroup = (NumberGroup) findViewById(R.id.numbers_view);
 
-        mDreamTextView = (TextView) findViewById(R.id.dream_text);
-        mDreamTextView.setText(getTextFromPreferences());
+        ((RelativeLayout.LayoutParams) mNumberGroup.getLayoutParams()).removeRule(RelativeLayout.CENTER_IN_PARENT);
+
+        mAnimator = new HexAnimator(colourView, mNumberGroup, true);
+        mAnimator.setDuration(ANIMATION_DURATION);
+
+        getWindowManager().getDefaultDisplay().getRectSize(mRect);
     }
 
     @Override
     public void onDreamingStarted() {
         super.onDreamingStarted();
 
-        // TODO: Begin animations or other behaviors here.
-
-        startTextViewScrollAnimation();
+        // Wait for the first layout pass
+        mNumberGroup.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(final View v,
+                   final int left, final int top, final int right, final int bottom,
+                   final int oldLeft, final int oldTop, final int oldRight, final int oldBottom) {
+                mNumberGroup.removeOnLayoutChangeListener(this);
+                move();
+            }
+        });
     }
 
     @Override
     public void onDreamingStopped() {
         super.onDreamingStopped();
 
-        // TODO: Stop anything that was started in onDreamingStarted()
-
-        mAnimator.cancel();
+        mAnimator.stop();
     }
 
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        // TODO: Dismantle resources
-        // (for example, detach from handlers and listeners).
+        mAnimator.close();
     }
 
-    private String getTextFromPreferences() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        return prefs.getString(getString(R.string.pref_dream_text_key),
-                getString(R.string.pref_dream_text_default));
-    }
+    private void move() {
+        final Point randomPoint = getRandomPointInside();
+        mNumberGroup.setX(randomPoint.x);
+        mNumberGroup.setY(randomPoint.y);
 
-    private void startTextViewScrollAnimation() {
-        // Refresh Size of Window
-        getWindowManager().getDefaultDisplay().getSize(mPointSize);
-
-        final int windowWidth = mPointSize.x;
-        final int windowHeight = mPointSize.y;
-
-        // Move TextView so it's moved all the way to the left
-        mDreamTextView.setTranslationX(-mDreamTextView.getWidth());
-
-        // Move TextView to random y value
-        final int yRange = windowHeight - mDreamTextView.getHeight();
-        mDreamTextView.setTranslationY(mRandom.nextInt(yRange));
-
-        // Create an Animator and keep a reference to it
-        mAnimator = mDreamTextView.animate().translationX(windowWidth)
-            .setDuration(3000)
-            .setStartDelay(500)
-            .setListener(mAnimListener)
-            .setInterpolator(sInterpolator);
-
-        // Start the animation
         mAnimator.start();
+        mHandler.postDelayed(mStopRunnable, SHOW_DURATION);
+    }
+
+    private void prepNextAnimation() {
+        mAnimator.stop();
+        mHandler.postDelayed(mMoveRunnable, INTERMISSION_DURATION);
+    }
+
+    private Point getRandomPointInside() {
+
+        final int x = mRect.left +
+                (int)(Math.random() * (mRect.right - mNumberGroup.getWidth() - mRect.left));
+        final int y = mRect.top +
+                (int)(Math.random() * (mRect.bottom - mNumberGroup.getHeight() - mRect.top));
+
+        return new Point(x, y);
     }
 
 }
