@@ -22,7 +22,6 @@ public class MainActivity
 
     private static final int CLOSE_ACTION_BAR = 0;
 
-    private boolean mRotated;
     private HexAnimator mAnimator;
     private SelectColourAlgorithmFragment mFragment;
 
@@ -54,8 +53,8 @@ public class MainActivity
 
         colourView.setOnClickListener(this);
 
-        mRotated = (savedInstanceState != null && savedInstanceState.getBoolean(KEY_ROTATED));
-        mAnimator = new HexAnimator(colourView, numberGroup, !mRotated);
+        final boolean rotated = (savedInstanceState != null && savedInstanceState.getBoolean(KEY_ROTATED));
+        mAnimator = new HexAnimator(colourView, numberGroup, !rotated);
         mAnimator.start();
 
         final FragmentManager manager = getSupportFragmentManager();
