@@ -1,13 +1,14 @@
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+
+    compileSdkVersion 'android-L'
+    buildToolsVersion '20.0.0'
 
     defaultConfig {
-        applicationId "com.deange.hexclock"
+        applicationId 'com.deange.hexclock'
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion 'L'
         versionCode 1
         versionName "1.0"
     }
@@ -17,11 +18,45 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    signingConfigs {
+        release {
+            storeFile new File("notYourRealFileName")
+            keyAlias 'notYourRealKeystoreAlias'
+            storePassword 'notYourRealPassword'
+            keyPassword 'notYourRealPassword'
+        }
+    }
+
     buildTypes {
         release {
             runProguard false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+}
+
+task askForPasswords << {
+
+    if (System.console() == null) {
+        throw new RuntimeException("No console available!")
+    }
+
+    def filePath    = new File(System.getenv("KEYSTORE_PATH"))
+    def alias       = System.getenv("KEYSTORE_ALIAS")
+    def storePw     = new String(System.console().readPassword("\nKeystore password: "))
+    def keyPw       = new String(System.console().readPassword("Key password for '" + alias + "': "))
+
+    android.signingConfigs.release.storeFile = filePath
+    android.signingConfigs.release.keyAlias = alias
+    android.signingConfigs.release.storePassword = storePw
+    android.signingConfigs.release.keyPassword = keyPw
+}
+
+tasks.whenTaskAdded { theTask ->
+    if ("packageRelease".equals(theTask.name)) {
+        theTask.dependsOn "askForPasswords"
     }
 }
 
