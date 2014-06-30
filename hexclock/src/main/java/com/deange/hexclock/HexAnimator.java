@@ -50,6 +50,7 @@ public class HexAnimator implements Closeable {
 
     private void update() {
         final Instant now = Instant.get();
+        final int colour = convertInstantToColour(now);
 
         mNumberGroup.update(now.getHours(), now.getMinutes(), now.getSeconds());
         mHandler.postDelayed(new Runnable() {
@@ -57,7 +58,7 @@ public class HexAnimator implements Closeable {
             public void run() {
                 // Delay is needed since the number group performs an animation
                 // 100ms is roughly in the middle of the animation
-                mColourView.setColour(0xFF000000 | Integer.parseInt(now.toString(), 16));
+                mColourView.setColour(colour);
             }
         }, DELAY);
     }
@@ -113,6 +114,12 @@ public class HexAnimator implements Closeable {
             mTimer.purge();
             mTimer = null;
         }
+    }
+
+    public static int convertInstantToColour(final Instant now) {
+        // Basic RGB conversion for now
+        final int hex = Integer.parseInt(now.toString(), 16);
+        return 0xFF000000 | hex;
     }
 
     private final class UpdateTask extends TimerTask {

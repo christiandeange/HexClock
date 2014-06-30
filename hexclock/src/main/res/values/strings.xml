@@ -3,5 +3,6 @@
 
     <string name="app_name">HexClock</string>
     <string name="hash_character">#</string>
+    <string name="menu_colour_options">Colour Options</string>
 
 </resources>

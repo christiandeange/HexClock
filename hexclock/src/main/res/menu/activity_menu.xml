@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_choose_interpreter"
+        android:title="@string/menu_colour_options"
+        android:icon="@drawable/ic_colorpicker_light"
+        android:showAsAction="always" />
+
+</menu>

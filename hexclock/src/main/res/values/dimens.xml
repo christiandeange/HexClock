@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="numberview_text_size">30sp</dimen>
+    <dimen name="numberview_text_size">40sp</dimen>
 
 </resources>
