@@ -7,10 +7,8 @@ import android.os.Handler;
 import android.view.View;
 
 import java.io.Closeable;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class HexAnimator implements Closeable {
+public class HexAnimator implements Closeable, SecondlyTimer.OnSecondListener {
 
     private static final int DELAY = 100;
     private static final int ANIMATE_DELAY = 500;
@@ -19,10 +17,21 @@ public class HexAnimator implements Closeable {
     private ColourView mColourView;
     private NumberGroup mNumberGroup;
 
-    private final boolean mAnimate;
     private int mDuration = ANIMATE_DURATION;
+    private final boolean mAnimate;
+    private final AnimatorListenerAdapter mAnimatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(final Animator animation) {
+            close();
+        }
 
-    private Timer mTimer;
+        @Override
+        public void onAnimationCancel(final Animator animation) {
+            close();
+        }
+    };
+
+    private SecondlyTimer mTimer;
     private final Handler mHandler = new Handler();
 
     public HexAnimator(final ColourView colourView, final NumberGroup numberGroup) {
@@ -33,7 +42,7 @@ public class HexAnimator implements Closeable {
         mColourView = colourView;
         mNumberGroup = numberGroup;
         mAnimate = animate;
-        mTimer = new Timer();
+        mTimer = new SecondlyTimer(this);
 
         if (mAnimate) {
             mNumberGroup.setAlpha(0);
@@ -48,11 +57,11 @@ public class HexAnimator implements Closeable {
         mDuration = duration;
     }
 
-    private void update() {
-        final Instant now = Instant.get();
-        final int colour = convertInstantToColour(now);
+    @Override
+    public void onUpdate(final Instant instant) {
+        final int colour = convertInstantToColour(instant);
 
-        mNumberGroup.update(now.getHours(), now.getMinutes(), now.getSeconds());
+        mNumberGroup.update(instant.getHours(), instant.getMinutes(), instant.getSeconds());
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -64,42 +73,20 @@ public class HexAnimator implements Closeable {
     }
 
     public void start() {
-        final long now = System.currentTimeMillis();
-        final long nextSecond = (now / 1000 + 1) * 1000;
-        final int wait = (int) (nextSecond - now);
-
+        mTimer.start();
         if (mAnimate) {
             final ObjectAnimator animator = ObjectAnimator.ofFloat(mNumberGroup, View.ALPHA, 0, 1);
             animator.setStartDelay(ANIMATE_DELAY);
             animator.setDuration(mDuration);
             animator.start();
         }
-
-        mTimer = new Timer();
-        mTimer.scheduleAtFixedRate(new UpdateTask(), wait, 1000);
-    }
-
-    public boolean isRunning() {
-        return mTimer != null;
     }
 
     public void stop() {
-
         if (mAnimate) {
             final ObjectAnimator animator = ObjectAnimator.ofFloat(mNumberGroup, View.ALPHA, 1, 0);
             animator.setDuration(mDuration);
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(final Animator animation) {
-                    close();
-                }
-
-                @Override
-                public void onAnimationCancel(final Animator animation) {
-                    close();
-                }
-            });
-
+            animator.addListener(mAnimatorListener);
             animator.start();
 
         } else {
@@ -109,11 +96,7 @@ public class HexAnimator implements Closeable {
 
     @Override
     public void close() {
-        if (mTimer != null) {
-            mTimer.cancel();
-            mTimer.purge();
-            mTimer = null;
-        }
+        mTimer.stop();
     }
 
     public static int convertInstantToColour(final Instant now) {
@@ -121,20 +104,4 @@ public class HexAnimator implements Closeable {
         final int hex = Integer.parseInt(now.toString(), 16);
         return 0xFF000000 | hex;
     }
-
-    private final class UpdateTask extends TimerTask {
-
-        private final Runnable mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                update();
-            }
-        };
-
-        @Override
-        public void run() {
-            mHandler.post(mRunnable);
-        }
-    }
-
 }
