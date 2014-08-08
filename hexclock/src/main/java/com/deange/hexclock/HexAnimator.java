@@ -10,9 +10,13 @@ import java.io.Closeable;
 
 public class HexAnimator implements Closeable, SecondlyTimer.OnSecondListener {
 
-    private static final int DELAY = 100;
-    private static final int ANIMATE_DELAY = 500;
+    private static final int COLOUR_UPDATE_DELAY = 100;
+    private static final int ANIMATE_DELAY = 100;
     private static final int ANIMATE_DURATION = 1500;
+
+    private static final int FADE_ENABLED = 0;
+    private static final int FADE_DISABLED = 1;
+    private static final int FADE_UNSPECIFIED = 2;
 
     private ColourView mColourView;
     private NumberGroup mNumberGroup;
@@ -69,17 +73,36 @@ public class HexAnimator implements Closeable, SecondlyTimer.OnSecondListener {
                 // 100ms is roughly in the middle of the animation
                 mColourView.setColour(colour);
             }
-        }, DELAY);
+        }, COLOUR_UPDATE_DELAY);
+    }
+
+    public void startWithAnimation(final boolean shouldFadeIn) {
+        startTimer(shouldFadeIn ? FADE_ENABLED : FADE_DISABLED);
     }
 
     public void start() {
+        startTimer(FADE_UNSPECIFIED);
+    }
+
+    private void startTimer(final int overrideAnimate) {
         mTimer.start();
-        if (mAnimate) {
+
+        final boolean animate = shouldAnimate(overrideAnimate);
+        if (animate) {
             final ObjectAnimator animator = ObjectAnimator.ofFloat(mNumberGroup, View.ALPHA, 0, 1);
             animator.setStartDelay(ANIMATE_DELAY);
             animator.setDuration(mDuration);
             animator.start();
         }
+
+        // Start the clock at the current time
+        final Instant instant = Instant.get();
+        mNumberGroup.updateImmediate(
+                instant.getHours(), instant.getMinutes(), instant.getSeconds());
+    }
+
+    private boolean shouldAnimate(final int overrideAnimate) {
+        return overrideAnimate == FADE_ENABLED || (overrideAnimate != FADE_DISABLED && mAnimate);
     }
 
     public void stop() {

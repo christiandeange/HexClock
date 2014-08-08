@@ -49,11 +49,11 @@ public class NumberGroup extends FrameLayout {
         });
     }
 
-    public void apply(final NumberHelper.NumberViewMutator mutator) {
-        mHelper.apply(mutator);
+    public void update(final int hours, final int minutes, final int seconds) {
+        mHelper.delegateTime(hours, minutes, seconds, false);
     }
 
-    public void update(final int hours, final int minutes, final int seconds) {
-        mHelper.delegateTime(hours, minutes, seconds);
+    public void updateImmediate(final int hours, final int minutes, final int seconds) {
+        mHelper.delegateTime(hours, minutes, seconds, true);
     }
 }

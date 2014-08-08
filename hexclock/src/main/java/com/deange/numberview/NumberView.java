@@ -38,6 +38,7 @@ public class NumberView extends View {
     private static final String MEASURING_TEXT = "8";
 
     private static final int FRAME_COUNT = 24;
+    private static final int EMPTY_POSITION = 10;
     private static final float DEFAULT_WIDTH = 140;
     private static final float DEFAULT_HEIGHT = 200;
 
@@ -209,6 +210,21 @@ public class NumberView extends View {
         }
     }
 
+    public void advanceImmediate() {
+        advanceImmediate(mNext + 1);
+    }
+
+    public void advanceImmediate(final int nextIndex) {
+        // Convenience to set the next index and advance to it immediately in one call
+        setNextNumberIndex(nextIndex);
+        mCurrent = mNext;
+
+        if (!isAnimating()) {
+            postInvalidate();
+        }
+
+    }
+
     private void setScale(float scale) {
 
         if (scale == 0) {
@@ -305,7 +321,7 @@ public class NumberView extends View {
         mPath.reset();
 
         checkSequenceBounds();
-        final int thisNumberShown = mFirstDraw ? 10 : mSequence[mCurrent];
+        final int thisNumberShown = mFirstDraw ? EMPTY_POSITION : mSequence[mCurrent];
         final int nextNumberShown = mSequence[mNext];
 
         final float[][] current = mPoints[thisNumberShown];

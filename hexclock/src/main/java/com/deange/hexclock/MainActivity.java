@@ -22,6 +22,8 @@ public class MainActivity
 
     private static final int CLOSE_ACTION_BAR = 0;
 
+    private boolean mRotated;
+    private boolean mWentThroughOnCreate;
     private HexAnimator mAnimator;
     private SelectColourAlgorithmFragment mFragment;
 
@@ -43,6 +45,8 @@ public class MainActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mWentThroughOnCreate = true;
+
         final ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.hide();
@@ -53,9 +57,8 @@ public class MainActivity
 
         colourView.setOnClickListener(this);
 
-        final boolean rotated = (savedInstanceState != null && savedInstanceState.getBoolean(KEY_ROTATED));
-        mAnimator = new HexAnimator(colourView, numberGroup, !rotated);
-        mAnimator.start();
+        mRotated = (savedInstanceState != null && savedInstanceState.getBoolean(KEY_ROTATED));
+        mAnimator = new HexAnimator(colourView, numberGroup, !mRotated);
 
         final FragmentManager manager = getSupportFragmentManager();
         mFragment = (SelectColourAlgorithmFragment)
@@ -63,6 +66,18 @@ public class MainActivity
         if (mFragment != null) {
             mFragment.setListener(this);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAnimator.startWithAnimation(mWentThroughOnCreate && !mRotated);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mWentThroughOnCreate = false;
     }
 
     @Override
@@ -99,6 +114,7 @@ public class MainActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mAnimator.stop();
         mAnimator.close();
     }
 

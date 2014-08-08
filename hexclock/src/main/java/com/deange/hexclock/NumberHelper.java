@@ -18,21 +18,26 @@ public final class NumberHelper {
         mViews = views;
     }
 
-    public void delegateTime(final int hours, final int minutes, final int seconds) {
-        advanceIfNecessary(get(HOUR_TENS), hours / 10);
-        advanceIfNecessary(get(HOUR_ONES), hours % 10);
-        advanceIfNecessary(get(MINUTE_TENS), minutes / 10);
-        advanceIfNecessary(get(MINUTE_ONES), minutes % 10);
-        advanceIfNecessary(get(SECOND_TENS), seconds / 10);
-        advanceIfNecessary(get(SECOND_ONES), seconds % 10);
+    public void delegateTime(final int hours, final int minutes, final int seconds,
+                             final boolean immediate) {
+        advanceIfNecessary(get(HOUR_TENS),   hours / 10,   immediate);
+        advanceIfNecessary(get(HOUR_ONES),   hours % 10,   immediate);
+        advanceIfNecessary(get(MINUTE_TENS), minutes / 10, immediate);
+        advanceIfNecessary(get(MINUTE_ONES), minutes % 10, immediate);
+        advanceIfNecessary(get(SECOND_TENS), seconds / 10, immediate);
+        advanceIfNecessary(get(SECOND_ONES), seconds % 10, immediate);
     }
 
     private NumberView get(final int index) {
         return mViews[index];
     }
 
-    private void advanceIfNecessary(final NumberView view, final int next) {
-        if (view.getCurrentNumber() != next) {
+    private void advanceIfNecessary(final NumberView view, final int next,
+                                    final boolean immediate) {
+        if (immediate) {
+            view.advanceImmediate(next);
+
+        } else if (view.getCurrentNumber() != next) {
             view.advance(next);
         }
     }
