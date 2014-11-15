@@ -1,11 +1,11 @@
 package com.deange.hexclock;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 
 public class MainActivity
-        extends FragmentActivity {
+        extends Activity {
 
     private static final String KEY_ROTATED = "rotated";
 
